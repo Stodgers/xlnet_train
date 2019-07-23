@@ -27,7 +27,7 @@ with open('233.txt','a', encoding='utf-8') as f: # 'a'表示append,即在原来�
             if len(str)<=30:
                 k+=1
                 continue
-            f.write((" ").join(jieba.lcut(str)) + "\n\n")
+            f.write(str + "\n\n")
             print(str)
         else:
             #lst.append(str)
