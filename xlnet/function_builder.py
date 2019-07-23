@@ -38,8 +38,8 @@ def construct_scalar_host_call(
 
         return tf.contrib.summary.all_summary_ops()
 
-  global_step_tensor = tf.reshape(tf.train.get_or_create_global_step(), [1])
-  other_tensors = [tf.reshape(monitor_dict[key], [1]) for key in metric_names]
+  global_step_tensor = tf.reshape(tf.train.get_or_create_global_step(), [1]).as_list()
+  other_tensors = [tf.reshape(monitor_dict[key], [1]).as_list() for key in metric_names]
 
   return host_call_fn, [global_step_tensor] + other_tensors
 
