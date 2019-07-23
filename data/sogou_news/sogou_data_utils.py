@@ -28,7 +28,7 @@ with open('233.txt','a', encoding='utf-8') as f: # 'a'表示append,即在原来�
                 k+=1
                 continue
             f.write((" ").join(jieba.lcut(str)) + "\n\n")
-            print(k)
+            print(str)
         else:
             #lst.append(str)
             str = ''
