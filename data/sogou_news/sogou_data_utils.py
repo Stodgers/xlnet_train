@@ -29,11 +29,10 @@ with open('smarty-t233.txt','a', encoding='utf-8') as f: # 'a'表示append,即�
             if len(str)<=30:
                 k+=1
                 continue
-            f.write(kline + " ".join(jieba.lcut(str)))
+            f.write(kline + str)
             if flag==0:
                 flag=1
                 kline = '\n\n'
-            print(" ".join(jieba.lcut(str)))
         else:
             #lst.append(str)
             str = ''
