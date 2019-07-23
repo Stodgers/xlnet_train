@@ -14,7 +14,9 @@ with open('t233.txt','a', encoding='gb18030') as f: # 'a'表示append,即在原�
     data = open('news_sohusite_xml.smarty.dat', errors='ignore', encoding='gb18030')
     k = 1
     str = ''
+    kline= ''
     lst = []
+    flag = 0
     for i in data.readlines():
         if k % 6 == 4:
             str += i[14:-16]
@@ -27,7 +29,10 @@ with open('t233.txt','a', encoding='gb18030') as f: # 'a'表示append,即在原�
             if len(str)<=30:
                 k+=1
                 continue
-            f.write(" ".join(jieba.cut(str)) + "\n\n")
+            f.write(kline + " ".join(jieba.cut(str)))
+            if flag==0:
+                flag=1
+                kline = '\n\n'
             print(str)
         else:
             #lst.append(str)
