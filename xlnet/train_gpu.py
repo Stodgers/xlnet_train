@@ -299,8 +299,8 @@ def train(ps_device):
             curr_step, fetched[-3], fetched[-2],
             curr_loss, math.exp(curr_loss), curr_loss / math.log(2)))
         total_loss, prev_step = 0., curr_step
-      print("---------------",type(curr_step),FLAGS.save_steps,"!!!!!!")
-      if curr_step > 0 and int(curr_step) % int(FLAGS.save_steps) == 0:
+      #print("---------------",type(curr_step),FLAGS.save_steps,"!!!!!!")
+      if curr_step > 0 and curr_step % FLAGS.save_steps == 0:
         save_path = os.path.join(FLAGS.model_dir, "model.ckpt")
         saver.save(sess, save_path)
         tf.logging.info("Model saved in path: {}".format(save_path))
