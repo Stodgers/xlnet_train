@@ -36,7 +36,7 @@ with open(txt,'a', encoding='utf-8') as f: # 'a'表示append,即在原来文件�
             f.write(kline + str)
             if flag==0:
                 flag=1
-                kline = '\n'
+                kline = '\n\n'
         else:
             #lst.append(str)
             str = ''
