@@ -10,13 +10,14 @@ import pandas as pd
 import numpy as np
 import jieba
 
-dat = 'news_sohusite_xml.smarty.dat'
+dat = 'news_sohusite_xml.dat'
 txt = 'T-'+dat[:-4]+'.txt'
 print(txt)
 #ss = open('news_sohusite_xml.smarty.dat',encoding='utf-8')
 with open(txt,'a', encoding='utf-8') as f: # 'a'表示append,即在原来文件内容后继续写数据（不清楚原有数据）
     data = open(dat, errors='ignore', encoding='gb18030')
     k = 1
+    line = 0
     str = ''
     kline= ''
     lst = []
@@ -27,17 +28,21 @@ with open(txt,'a', encoding='utf-8') as f: # 'a'表示append,即在原来文件�
             str = str.replace("　", "")
             str = str.replace("", "")
         elif k % 6 == 5:
-            str += '。' + i[9:-11]
+            str += '\n'+ i[9:-11]
             str = str.replace("　", "")
             str = str.replace("", "")
-            if len(str)<=30:
+            if len(str)<=35:
                 k+=1
                 continue
             f.write(kline + str)
+            line += 3
             if flag==0:
                 flag=1
                 kline = '\n\n'
+
         else:
             #lst.append(str)
             str = ''
         k += 1
+        if line>=3500000:break
+    print(line)
