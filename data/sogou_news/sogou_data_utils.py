@@ -9,7 +9,6 @@
 import pandas as pd
 import numpy as np
 import jieba
-
 dat = 'news_sohusite_xml.dat'
 txt = 'T-'+dat[:-4]+'.txt'
 print(txt)
