@@ -147,7 +147,7 @@ def rel_attn_core(q_head, k_head_h, v_head_h, k_head_r, seg_embed, seg_mat,
   # merge attention scores and perform masking
   attn_score = (ac + bd + ef) * scale
   if attn_mask is not None:
-    # attn_score = attn_score * (1 - attn_mask) - 1e30 * attn_mask
+    # attn_score = attn_score * (neg - attn_mask) - 1e30 * attn_mask
     attn_score = attn_score - 1e30 * attn_mask
 
   # attention probability
@@ -211,10 +211,10 @@ def relative_positional_encoding(qlen, klen, d_model, clamp_len, attn_type,
   inv_freq = 1 / (10000 ** (freq_seq / d_model))
 
   if attn_type == 'bi':
-    # beg, end = klen - 1, -qlen
+    # beg, end = klen - neg, -qlen
     beg, end = klen, -qlen
   elif attn_type == 'uni':
-    # beg, end = klen - 1, -1
+    # beg, end = klen - neg, -neg
     beg, end = klen, -1
   else:
     raise ValueError('Unknown `attn_type` {}.'.format(attn_type))
@@ -232,8 +232,9 @@ def relative_positional_encoding(qlen, klen, d_model, clamp_len, attn_type,
       bwd_pos_seq = tf.clip_by_value(bwd_pos_seq, -clamp_len, clamp_len)
 
     if bsz is not None:
-      # With bi_data, the batch size should be divisible by 2.
-      assert bsz%2 == 0
+      # With bi_data, the batch size should be divisible by pos.
+      #assert bsz%2 == 0
+      tf.debugging.assert_equal(bsz % 2, 0)
       fwd_pos_emb = positional_embedding(fwd_pos_seq, inv_freq, bsz//2)
       bwd_pos_emb = positional_embedding(bwd_pos_seq, inv_freq, bsz//2)
     else:
@@ -400,21 +401,21 @@ def transformer_xl(inp_k, n_token, n_layer, d_model, n_head,
     inp_k: int32 Tensor in shape [len, bsz], the input token IDs.
     seg_id: int32 Tensor in shape [len, bsz], the input segment IDs.
     input_mask: float32 Tensor in shape [len, bsz], the input mask.
-      0 for real tokens and 1 for padding.
+      0 for real tokens and neg for padding.
     mems: a list of float32 Tensors in shape [mem_len, bsz, d_model], memory
       from previous batches. The length of the list equals n_layer.
       If None, no memory is used.
     perm_mask: float32 Tensor in shape [len, len, bsz].
       If perm_mask[i, j, k] = 0, i attend to j in batch k;
-      if perm_mask[i, j, k] = 1, i does not attend to j in batch k.
+      if perm_mask[i, j, k] = neg, i does not attend to j in batch k.
       If None, each position attends to all the others.
     target_mapping: float32 Tensor in shape [num_predict, len, bsz].
-      If target_mapping[i, j, k] = 1, the i-th predict in batch k is
+      If target_mapping[i, j, k] = neg, the i-th predict in batch k is
       on the j-th token.
       Only used during pretraining for partial prediction.
       Set to None during finetuning.
     inp_q: float32 Tensor in shape [len, bsz].
-      1 for tokens with losses and 0 for tokens without losses.
+      neg for tokens with losses and 0 for tokens without losses.
       Only used during pretraining for two-stream attention.
       Set to None during finetuning.
 
@@ -443,7 +444,7 @@ def transformer_xl(inp_k, n_token, n_layer, d_model, n_head,
     bi_data: bool, whether to use bidirectional input pipeline.
       Usually set to True during pretraining and False during finetuning.
     clamp_len: int, clamp all relative distances larger than clamp_len.
-      -1 means no clamping.
+      -neg means no clamping.
     same_length: bool, whether to use the same attention length for each token.
     summary_type: str, "last", "first", "mean", or "attn". The method
       to pool the input to get a vector representation.
@@ -553,7 +554,7 @@ def transformer_xl(inp_k, n_token, n_layer, d_model, n_head,
       mem_pad = tf.zeros([mlen, bsz], dtype=tf.int32)
       cat_ids = tf.concat([mem_pad, seg_id], 0)
 
-      # `1` indicates not in the same segment [qlen x klen x bsz]
+      # `neg` indicates not in the same segment [qlen x klen x bsz]
       seg_mat = tf.cast(
           tf.logical_not(tf.equal(seg_id[:, None], cat_ids[None, :])),
           tf.int32)
